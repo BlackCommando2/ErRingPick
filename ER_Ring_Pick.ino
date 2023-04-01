@@ -52,6 +52,7 @@ bool rLs1 = false, rLs2 = false, pLs1 = false, pLs2 = false;
 void setup()
 {
   Serial.begin(115200);
+  delay(5000);
   rotationMotor.setEncoder(&rotationEncoder);
   platformMotor.setEncoder(&platformEncoder);
 
@@ -78,18 +79,19 @@ void loop()
 {
   rotatePulse = rotationMotor.getReadings();
   platformPulse = platformMotor.getReadings();
+//  Serial.println(rotatePulse);
   if (Serial.available() > 0)
   {
     rotateLevel = Serial.readStringUntil(',').toInt();
     platformLevel = Serial.readStringUntil('\n').toInt();
   }
-
+  
   if (!init_)
   {
     pLs1 = !(bool)digitalRead(platformLs1);
     pLs2 = !(bool)digitalRead(platformLs2);
     rLs1 = !(bool)digitalRead(rotateLs1);
-    rLs1 = !(bool)digitalRead(rotateLs1);
+    rLs2 = !(bool)digitalRead(rotateLs2);
 
     if ((rLs1 || rLs2) && (rInternalLvl == -1 || rInternalLvl == 1 || rInternalLvl == 2 || rInternalLvl == -2 || rInternalLvl == -3)) // give range afterwards for rInternal
     {
@@ -115,7 +117,7 @@ void loop()
 
       if (rInternalLvl == -2 || rInternalLvl == -3) // to remove uneccesary comaprison
       {
-        Serial.println("doNothing");
+//        Serial.println("doNothing");
       }
       else if (rInternalLvl == -1) // detected that a limit switch is pressed
       {
@@ -140,7 +142,7 @@ void loop()
       }
     }
 
-    if (!rLs1 && !rLs2) // no ls is pressed
+    if (!rLs1 && !rLs2 && rInternalLvl == -1) // no ls is pressed
     {
       Serial.println("noLimit pressed");
       rMPID.setPulse(resetPulse);
