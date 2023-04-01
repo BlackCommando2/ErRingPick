@@ -72,7 +72,7 @@ void setup()
 
   setId("PICKE");
   message.init("ESP11");
-  message.setOnRecieve(pick, "picking");
+  //  message.setOnRecieve(pick, "picking");
 }
 void loop()
 {
@@ -149,8 +149,8 @@ void loop()
     {
       Serial.println("First LS-1 pressed");
       rotationMotor.reset();
-      rotationMotor.setReadings(0); // can use setReadings(0)
-      rMPID.setPulse(0);//changed
+      //      rotationMotor.setReadings(0); // can use setReadings(0)
+      //      rMPID.setPulse(0);//changed
       rInternalLvl = 1;
     }
     else if (rLs2 && rInternalLvl == 0) // if first ls2 is pressed
@@ -168,8 +168,8 @@ void loop()
     else if (!rLs1 && rInternalLvl == 2) // going to level1
     {
       Serial.println("Goto level 1");
-      rotationMotor.setPulse(-resetPulse);
-      rInternalLvl = -3; 
+      rMPID.setPulse(-resetPulse);
+      rInternalLvl = -3;
     }
     rMPID.compute();
   }
