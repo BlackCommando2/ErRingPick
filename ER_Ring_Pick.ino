@@ -84,7 +84,7 @@ void loop()
     platformLevel = Serial.readStringUntil('\n').toInt();
   }
 
-  if (init_ = false)
+  if (!init_)
   {
     pLs1 = !(bool)digitalRead(platformLs1);
     pLs2 = !(bool)digitalRead(platformLs2);
@@ -143,9 +143,9 @@ void loop()
     if (!rLs1 && !rLs2) // no ls is pressed
     {
       Serial.println("noLimit pressed");
-      rotationMotor.setPulse(resetPulse);
+      rMPID.setPulse(resetPulse);
     }
-    else if (rLs1 && rInternalLvl = 0) // if first ls1 is pressed
+    else if (rLs1 && rInternalLvl == 0) // if first ls1 is pressed
     {
       Serial.println("First LS-1 pressed");
       rotationMotor.reset();
@@ -153,7 +153,7 @@ void loop()
       rMPID.setPulse(0);//changed
       rInternalLvl = 1;
     }
-    else if (rLs2 && rInternalLvl = 0) // if first ls2 is pressed
+    else if (rLs2 && rInternalLvl == 0) // if first ls2 is pressed
     {
       Serial.println("First LS-2 pressed");
       rotationMotor.reset();
@@ -162,7 +162,7 @@ void loop()
     else if (!rLs2 && rInternalLvl == 1) // going to level2
     {
       Serial.println("Goto level 2");
-      rotationMotor.setPulse(-resetPulse);
+      rMPID.setPulse(-resetPulse);
       rInternalLvl = -2;
     }
     else if (!rLs1 && rInternalLvl == 2) // going to level1
