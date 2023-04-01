@@ -38,11 +38,11 @@ double SoftKp1 = 0.3, SoftKi1 = 0, Softkd1 = 0;
 double AggKp2 = 1.2, AggKi2 = 0.0, Aggkd2 = 0;
 double SoftKp2 = 0.6, SoftKi2 = 0, Softkd2 = 0;
 
-int rotateLs1 = 15, rotateLs2 = 16, platformLs1 = 17, platformLs2 = 14;
+int rotateLs1 = 15, rotateLs2 = 16, platformLs1 = 14, platformLs2 = 17;
 
 int rotateLevel = 0, platformLevel = 0, platformSubLevel = 0;
 int rInternalLvl = -1, pInternalLvl = -1;
-double rotationPulseOffset = 0.05, platformPulseOffset = 0.05, signOffset = 0;
+double rotationPulseOffset = 0.05, platformPulseOffset = 0.05, signOffsetRotation = 0, signOffsetPlatform=0;
 
 long rotatePulse = 0, platformPulse = 0, resetPulse = 50000;
 long rLvl2Pulse = 0, pLvl1Pulse = 0, subLevel1 = 0, oneRingPulse = 0, rotationExtraPulse = 0, platformExtraPulse = 0;
@@ -74,13 +74,13 @@ void setup()
 
   setId("PICKE");
   remote.init("ESP11");
-  remote.setOnRecieve(rotationLvl1, "rLvl1");
-  remote.setOnRecieve(rotationLvl2, "rLvl2");
-  remote.setOnRecieve(platformLvl1, "pLvl1");
-  remote.setOnRecieve(platformSubLvl2, "pSLvl2");
-  remote.setOnRecieve(setRotateExtraPulse, "eP");
-  remote.setOnRecieve(setPlatformExtraPulse, "eR");
-  remote.setOnRecieve(resetAll,"Erst");
+//  remote.setOnRecieve(rotationLvl1, "rLvl1");
+//  remote.setOnRecieve(rotationLvl2, "rLvl2");
+//  remote.setOnRecieve(platformLvl1, "pLvl1");
+//  remote.setOnRecieve(platformSubLvl2, "pSLvl2");
+//  remote.setOnRecieve(setRotateExtraPulse, "eP");
+//  remote.setOnRecieve(setPlatformExtraPulse, "eR");
+//  remote.setOnRecieve(resetAll,"Erst");
 }
 void loop()
 {
@@ -134,6 +134,14 @@ void loop()
       {
         Serial.println("Both Switch Pressed and finally reached level 2");
         rLvl2Pulse = rotationMotor.getReadings();
+        if(rLvl2Pulse<0)
+        {
+          signOffsetRotation=-1;
+        }
+        else
+        {
+          signOffsetRotation=1;
+        }
         rotationExtraPulse = rLvl2Pulse * rotationPulseOffset;
         rInternalLvl = 3;
         rMPID.setPulse(rLvl2Pulse);
@@ -145,7 +153,7 @@ void loop()
         rotationExtraPulse = rLvl2Pulse * rotationPulseOffset;
         rotationMotor.reset();
         rInternalLvl = 3;
-        rMPID.setPulse(rLvl2Pulse);
+        rMPID.setPulse(-rLvl2Pulse);
         Serial.println("Goto level 2 after both switch press");
       }
     }
@@ -172,11 +180,19 @@ void loop()
       Serial.println("Goto level 2");
       rMPID.setPulse(-resetPulse);
       rInternalLvl = -2;
+      // if(rotationMotor.getReadings()<0)
+      // {
+      //   signOffsetRotation=-1;
+      // }
+      // else
+      // {
+      //   signOffsetRotation=1;
+      // }
     }
     else if (!rLs1 && rInternalLvl == 2) // going to level1
     {
       Serial.println("Goto level 1");
-      rMPID.setPulse(-resetPulse);
+      rMPID.setPulse(resetPulse);
       rInternalLvl = -3;
     }
     rMPID.compute();
@@ -222,6 +238,14 @@ void loop()
           platformExtraPulse = (pLvl1Pulse - subLevel1) * 0.05;
           pInternalLvl = 3;
           pMPID.setPulse(pLvl1Pulse);
+          if(rLvl2Pulse<0)
+          {
+            signOffsetPlatform=-1;
+          }
+          else
+          {
+            signOffsetPlatform=1;
+          }
         }
         else if (pInternalLvl == 1 && pLs2) // meaning rotated to lvl2
         {
@@ -232,8 +256,8 @@ void loop()
           oneRingPulse = (pLvl1Pulse - subLevel1) * 0.1;
           platformMotor.reset();
           pInternalLvl = 3;
-          pMPID.setPulse(pLvl1Pulse);
-          Serial.println("Goto level 2 after both switch press");
+          pMPID.setPulse(-pLvl1Pulse);
+          Serial.println("Goto level 1 after both switch press");
         }
       }
 
@@ -265,23 +289,31 @@ void loop()
         Serial.println("Goto level 1");
         pMPID.setPulse(-resetPulse);
         pInternalLvl = -3;
+        // if(platformMotor.getReadings()<0)
+        // {
+        //   signOffset=-1
+        // }
+        // else
+        // {
+        //   signOffset=1;
+        // }
       }
       pMPID.compute();
     }
   }
-  else if (init_)
-  {
-    if(rLs1)
-    {
-      rMPID.setPulse(rotateMotor.getReadings()+signOffset*rLvl2Pulse*0.03);
-    }
-    else if(rLs2)
-    {
-      rMPID.setPulse(rotateMotor.getReadings()+signOffset*-1*rLvl2Pulse*0.03);
-    }
-    rMPID.compute();
-    pMPID.compute();
-  }
+//  else if (init_)
+//  {
+//    if(rLs1)
+//    {
+//      rMPID.setPulse(rotationMotor.getReadings()+signOffsetRotation*rLvl2Pulse*0.03);
+//    }
+//    else if(rLs2)
+//    {
+//      rMPID.setPulse(rotationMotor.getReadings()+signOffsetRotation*-1*rLvl2Pulse*0.03);
+//    }
+//    rMPID.compute();
+//    pMPID.compute();
+//  }
 }
 
 void rotationLvl1(JSONVar msg)
@@ -310,47 +342,47 @@ void platformLvl1(JSONVar msg)
 
 void platformSubLvl2(JSONVar msg)
 {
-  platformLevel = 2;
-  platformSubLevel++;
-  Serial.println("platformSubLvl2");
-  init_ = true;
-  if (allRings)
-  {
-    pMPID.setPulse(subLevel1);
-    allRings = false;
-  }
-  else if (!allRings)
-  {
-    pMPID.setPulse(subLevel1 + oneRingPulse);
-  }
+ platformLevel = 2;
+ platformSubLevel++;
+ Serial.println("platformSubLvl2");
+ init_ = true;
+ if (allRings)
+ {
+   pMPID.setPulse(subLevel1);
+   allRings = false;
+ }
+ else if (!allRings)
+ {
+   pMPID.setPulse(subLevel1 + oneRingPulse);
+ }
 }
 
 void setRotateExtraPulse(JSONVar msg)
 {
-  int extraOffset = (int)msg["offset"];
-  Serial.println("setRotateExtraPulse");
-  rMPID.setPulse(rotationMotor.getReadings() + (signOffset*extraOffset*rotationExtraPulse));
+ int extraOffset = (int)msg["offset"];
+ Serial.println("setRotateExtraPulse");
+ rMPID.setPulse(rotationMotor.getReadings() + (signOffsetRotation*extraOffset*rotationExtraPulse));
 }
 
 void setPlatformExtraPulse(JSONVar msg)
 {
-  int extraOffset = (int)msg["offset"];
-  Serial.println("setPlatformExtraPulse");
-  rMPID.setPulse(platformMotor.getReadings() + (signOffset*extraOffset*platformExtraPulse));
+ int extraOffset = (int)msg["offset"];
+ Serial.println("setPlatformExtraPulse");
+ rMPID.setPulse(platformMotor.getReadings() + (signOffsetPlatform*extraOffset*platformExtraPulse));
 }
 
 void resetAll(JSONVar msg)
 {
-  Serial.println("resetAll");
-  init_ = false;
-  allRings = true;
+ Serial.println("resetAll");
+ init_ = false;
+ allRings = true;
 
-  rInternalLvl = -1;
-  rotateLevel = 0;
+ rInternalLvl = -1;
+ rotateLevel = 0;
 
-  pInternalLvl = -1;
-  platformLevel = 0;
-  platformSubLevel = 0;
+ pInternalLvl = -1;
+ platformLevel = 0;
+ platformSubLevel = 0;
 }
 
 // add offset for what extra up & down detection
