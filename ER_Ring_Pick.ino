@@ -56,12 +56,12 @@ void setup()
   platformMotor.setEncoder(&platformEncoder);
 
   rMPID.setThreshold(100);
-  rMPID.setOutputLimits(-60, 60);
+  rMPID.setOutputLimits(-30, 30);
   rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
   rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
 
   pMPID.setThreshold(50);
-  pMPID.setOutputLimits(-50, 50);
+  pMPID.setOutputLimits(-30, 30);
   pMPID.setAggTunings(AggKp2, AggKi2, Aggkd2);
   pMPID.setSoftTunings(SoftKp2, SoftKi2, Softkd2);
 
@@ -96,16 +96,19 @@ void loop()
 
       if (rInternalLvl >= -1) // stops motor
       {
+        Serial.println("Stop Motor");
         // rotationMotor.stop();
         rMPID.setPulse(rotationMotor.getReadings()); // can use rotatePulse // 0 issue
       }
       else if (rInternalLvl == -2 && rLs2) // reached lvl2
       {
+        Serial.println("Stop at level 2");
         rMPID.setPulse(rotationMotor.getReadings());
         rInternalLvl = 1;
       }
       else if (rInternalLvl == -3 && rLs1) // reached lvl1
       {
+        Serial.println("Stop at level 1");
         rMPID.setPulse(rotationMotor.getReadings());
         rInternalLvl = 2;
       }
@@ -116,29 +119,35 @@ void loop()
       }
       else if (rInternalLvl == -1) // detected that a limit switch is pressed
       {
+        Serial.println("Limit Switched Pressed");
         rInternalLvl = 0;
       }
       else if (rInternalLvl == 1 && rLs2) // meaning rotated to lvl2
       {
+        Serial.println("Both Switch Pressed and finally reached level 2");
         rLvl2Pulse = rotationMotor.getReadings();
         rInternalLvl = 3;
         rMPID.setPulse(rLvl2Pulse);
       }
       else if (rInternalLvl == 2 && rLs1) // meaning rotated to lvl1
       {
+        Serial.println("Both Switch Pressed and finally reached level 1");
         rLvl2Pulse = rotationMotor.getReadings();
         rotationMotor.reset();
         rInternalLvl = 3;
         rMPID.setPulse(rLvl2Pulse);
+        Serial.println("Goto level 2 after both switch press");
       }
     }
 
     if (!rLs1 && !rLs2) // no ls is pressed
     {
+      Serial.println("noLimit pressed");
       rotationMotor.setPulse(resetPulse);
     }
     else if (rLs1 && rInternalLvl = 0) // if first ls1 is pressed
     {
+      Serial.println("First LS-1 pressed");
       rotationMotor.reset();
       rotationMotor.setReadings(0); // can use setReadings(0)
       rMPID.setPulse(0);//changed
@@ -146,16 +155,19 @@ void loop()
     }
     else if (rLs2 && rInternalLvl = 0) // if first ls2 is pressed
     {
+      Serial.println("First LS-2 pressed");
       rotationMotor.reset();
       rInternalLvl = 2;
     }
     else if (!rLs2 && rInternalLvl == 1) // going to level2
     {
+      Serial.println("Goto level 2");
       rotationMotor.setPulse(-resetPulse);
       rInternalLvl = -2;
     }
     else if (!rLs1 && rInternalLvl == 2) // going to level1
     {
+      Serial.println("Goto level 1");
       rotationMotor.setPulse(-resetPulse);
       rInternalLvl = -3; 
     }
