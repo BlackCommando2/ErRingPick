@@ -86,10 +86,10 @@ void loop()
 
   if (init_ = false)
   {
-    pLs1 = digitalRead(platformLs1);
-    pLs2 = digitalRead(platformLs2);
-    rLs1 = digitalRead(rotateLs1);
-    rLs1 = digitalRead(rotateLs1);
+    pLs1 = !(bool)digitalRead(platformLs1);
+    pLs2 = !(bool)digitalRead(platformLs2);
+    rLs1 = !(bool)digitalRead(rotateLs1);
+    rLs1 = !(bool)digitalRead(rotateLs1);
 
     if ((rLs1 || rLs2) && (rInternalLvl == -1 || rInternalLvl == 1 || rInternalLvl == 2 || rInternalLvl == -2 || rInternalLvl == -3)) // give range afterwards for rInternal
     {
