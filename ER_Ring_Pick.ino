@@ -112,7 +112,7 @@ void loop()
       }
       else if (rInternalLvl == -2 && rLs2) // reached lvl2
       {
-        //Serial.println("Stop at level 2");
+        // Serial.println("Stop at level 2");
         rMPID.setPulse(rotationMotor.getReadings());
         rInternalLvl = 1;
       }
@@ -136,14 +136,14 @@ void loop()
       {
         Serial.println("Both Switch Pressed and finally reached level 2");
         rLvl2Pulse = rotationMotor.getReadings();
-        //        if (rLvl2Pulse < 0)
-        //        {
-        //          signOffsetRotation = -1;
-        //        }
-        //        else
-        //        {
-        //          signOffsetRotation = 1;
-        //        }
+        if (rLvl2Pulse < 0)
+        {
+          signOffsetRotation = -1;
+        }
+        else
+        {
+          signOffsetRotation = 1;
+        }
         rotationExtraPulse = rLvl2Pulse * rotationPulseOffset;
         rInternalLvl = 3;
         Serial.println("rsignOff: " + String(signOffsetRotation) + " rLvl2: " + String(rLvl2Pulse) + " rExtra: " + String(rotationExtraPulse));
@@ -154,18 +154,18 @@ void loop()
         Serial.println("Both Switch Pressed and finally reached level 1");
         rLvl2Pulse = rotationMotor.getReadings();
         rotationExtraPulse = rLvl2Pulse * rotationPulseOffset;
-        
-        rotationMotor.reset();
-        rInternalLvl = 3;
-        rMPID.setPulse(-rLvl2Pulse);
         if (rotationMotor.getReadings() < 0)
         {
-          signOffsetRotation = -1;
+          signOffsetRotation = 1;//-1
         }
         else
         {
-          signOffsetRotation = 1;
+          signOffsetRotation = -1;//1
         }
+
+        rotationMotor.reset();
+        rInternalLvl = 3;
+        rMPID.setPulse(signOffsetRotation*rLvl2Pulse);
         Serial.println("Goto level 2 after both switch press");
         Serial.println("rsignOff: " + String(signOffsetRotation) + " rLvl2: " + String(rLvl2Pulse) + " rExtra: " + String(rotationExtraPulse));
       }
@@ -173,7 +173,7 @@ void loop()
 
     if (!rLs1 && !rLs2 && rInternalLvl == -1) // no ls is pressed
     {
-      //Serial.println("noLimit pressed");
+      // Serial.println("noLimit pressed");
       rMPID.setPulse(resetPulse);
     }
     else if (rLs1 && rInternalLvl == 0) // if first ls1 is pressed
@@ -209,18 +209,18 @@ void loop()
 
         if (pInternalLvl >= -1) // stops motor
         {
-          //Serial.println("Stop Motor");
+          // Serial.println("Stop Motor");
           pMPID.setPulse(platformMotor.getReadings()); // can use rotatePulse // 0 issue
         }
         else if (pInternalLvl == -2 && pLs2) // reached lvl2
         {
-          //Serial.println("Stop at level 2");
+          // Serial.println("Stop at level 2");
           pMPID.setPulse(platformMotor.getReadings());
           pInternalLvl = 1;
         }
         else if (pInternalLvl == -3 && pLs1) // reached lvl1
         {
-          //Serial.println("Stop at level 1");
+          // Serial.println("Stop at level 1");
           pMPID.setPulse(platformMotor.getReadings());
           pInternalLvl = 2;
         }
@@ -231,12 +231,12 @@ void loop()
         }
         else if (pInternalLvl == -1) // detected that a limit switch is pressed
         {
-          //Serial.println("Limit Switched Pressed");
+          // Serial.println("Limit Switched Pressed");
           pInternalLvl = 0;
         }
         else if (pInternalLvl == 2 && pLs1) // meaning rotated to lvl1
         {
-          //Serial.println("Both Switch Pressed and finally reached level 2");
+          // Serial.println("Both Switch Pressed and finally reached level 2");
           pLvl1Pulse = platformMotor.getReadings();
           subLevel1 = pLvl1Pulse * 0.8;
           platformExtraPulse = (pLvl1Pulse - subLevel1) * 0.05;
@@ -254,7 +254,7 @@ void loop()
         }
         else if (pInternalLvl == 1 && pLs2) // meaning rotated to lvl2
         {
-          //Serial.println("Both Switch Pressed and finally reached level 1");
+          // Serial.println("Both Switch Pressed and finally reached level 1");
           pLvl1Pulse = platformMotor.getReadings();
           if (pLvl1Pulse < 0)
           {
@@ -271,36 +271,36 @@ void loop()
           pInternalLvl = 3;
           Serial.println("psignOff: " + String(signOffsetPlatform) + " pLvl1: " + String(pLvl1Pulse) + " Sublvl1: " + String(subLevel1) + " pExtra: " + String(platformExtraPulse) + " oneRing: " + String(oneRingPulse));
           pMPID.setPulse(signOffsetPlatform * pLvl1Pulse);
-          //Serial.println("Goto level 1 after both switch press");
+          // Serial.println("Goto level 1 after both switch press");
         }
       }
 
       if (!pLs1 && !pLs2 && pInternalLvl == -1) // no ls is pressed
       {
-        //Serial.println("Platform noLimit pressed");
+        // Serial.println("Platform noLimit pressed");
         pMPID.setPulse(resetPulse);
       }
       else if (pLs1 && pInternalLvl == 0) // if first ls1 is pressed
       {
-        //Serial.println("First LS-1 pressed");
+        // Serial.println("First LS-1 pressed");
         platformMotor.reset();
         pInternalLvl = 1;
       }
       else if (pLs2 && pInternalLvl == 0) // if first ls2 is pressed
       {
-        //Serial.println("First LS-2 pressed");
+        // Serial.println("First LS-2 pressed");
         platformMotor.reset();
         pInternalLvl = 2;
       }
       else if (!pLs2 && pInternalLvl == 1) // going to level2
       {
-        //Serial.println("Goto level 2");
+        // Serial.println("Goto level 2");
         pMPID.setPulse(-resetPulse);
         pInternalLvl = -2;
       }
       else if (!pLs1 && pInternalLvl == 2) // going to level1
       {
-        //Serial.println("Goto level 1");
+        // Serial.println("Goto level 1");
         pMPID.setPulse(-resetPulse);
         pInternalLvl = -3;
       }
@@ -335,7 +335,7 @@ void rotationLvl2(JSONVar msg)
   Serial.println("rotationLvl2");
   rotateLevel = 2;
   init_ = true;
-  rMPID.setPulse(rLvl2Pulse);
+  rMPID.setPulse(signOffsetRotation*rLvl2Pulse);
 }
 
 void platformLvl1(JSONVar msg)
