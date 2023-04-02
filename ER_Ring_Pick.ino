@@ -63,7 +63,7 @@ void setup()
   rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
 
   pMPID.setThreshold(50);
-  pMPID.setOutputLimits(-40, 40);
+  pMPID.setOutputLimits(-60, 60);
   pMPID.setAggTunings(AggKp2, AggKi2, Aggkd2);
   pMPID.setSoftTunings(SoftKp2, SoftKi2, Softkd2);
 
@@ -235,7 +235,7 @@ void loop()
         {
           //Serial.println("Both Switch Pressed and finally reached level 2");
           pLvl1Pulse = platformMotor.getReadings();
-          subLevel1 = pLvl1Pulse * 0.2;
+          subLevel1 = pLvl1Pulse * 0.8;
           platformExtraPulse = (pLvl1Pulse - subLevel1) * 0.05;
           pInternalLvl = 3;
           pMPID.setPulse(pLvl1Pulse);
@@ -261,7 +261,7 @@ void loop()
           {
             signOffsetPlatform = 1;
           }
-          subLevel1 = pLvl1Pulse * 0.2;
+          subLevel1 = pLvl1Pulse * 0.8;
           platformExtraPulse = (pLvl1Pulse - subLevel1) * 0.05;
           oneRingPulse = (pLvl1Pulse - subLevel1) * 0.1;
           platformMotor.reset();
