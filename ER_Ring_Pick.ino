@@ -34,9 +34,9 @@ positionalnew rMPID(&rotationMotor);
 positionalnew pMPID(&platformMotor);
 
 double AggKp1 = 1.0, AggKi1 = 0.0, Aggkd1 = 0;
-double SoftKp1 = 0.3, SoftKi1 = 0, Softkd1 = 0;
+double SoftKp1 = 0.25, SoftKi1 = 0.0, Softkd1 = 0;
 double AggKp2 = 1.2, AggKi2 = 0.0, Aggkd2 = 0;
-double SoftKp2 = 0.6, SoftKi2 = 0, Softkd2 = 0;
+double SoftKp2 = 0.4, SoftKi2 = 0, Softkd2 = 0;
 
 int rotateLs1 = 15, rotateLs2 = 16, platformLs1 = 14, platformLs2 = 17;
 
@@ -58,12 +58,12 @@ void setup()
   platformMotor.setEncoder(&platformEncoder);
 
   rMPID.setThreshold(100);
-  rMPID.setOutputLimits(-30, 30);
+  rMPID.setOutputLimits(-20, 20);
   rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
   rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
 
   pMPID.setThreshold(50);
-  pMPID.setOutputLimits(-80, 80);
+  pMPID.setOutputLimits(-70, 70);
   pMPID.setAggTunings(AggKp2, AggKi2, Aggkd2);
   pMPID.setSoftTunings(SoftKp2, SoftKi2, Softkd2);
 
@@ -336,8 +336,8 @@ void loop()
 
 void rotationLvl1(JSONVar msg)
 {
-  rMPID.setThreshold(100);
-  rMPID.setOutputLimits(-50, 50);
+  rMPID.setThreshold(200);
+  rMPID.setOutputLimits(-30, 30);
   rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
   rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
   Serial.println("rotationLvl1");
@@ -348,8 +348,8 @@ void rotationLvl1(JSONVar msg)
 
 void rotationLvl2(JSONVar msg)
 {
-  rMPID.setThreshold(100);
-  rMPID.setOutputLimits(-60, 60);
+  rMPID.setThreshold(200);
+  rMPID.setOutputLimits(-50, 50);
   rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
   rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
   Serial.println("rotationLvl2");
