@@ -190,14 +190,6 @@ void loop()
       //Serial.println("Goto level 2");
       rMPID.setPulse(-resetPulse);
       rInternalLvl = -2;
-      // if(rotationMotor.getReadings()<0)
-      // {
-      //   signOffsetRotation=-1;
-      // }
-      // else
-      // {
-      //   signOffsetRotation=1;
-      // }
     }
     else if (!rLs1 && rInternalLvl == 2) // going to level1
     {
@@ -215,7 +207,6 @@ void loop()
         if (pInternalLvl >= -1) // stops motor
         {
           //Serial.println("Stop Motor");
-          // platformMotor.stop();
           pMPID.setPulse(platformMotor.getReadings()); // can use rotatePulse // 0 issue
         }
         else if (pInternalLvl == -2 && pLs2) // reached lvl2
@@ -309,14 +300,6 @@ void loop()
         //Serial.println("Goto level 1");
         pMPID.setPulse(-resetPulse);
         pInternalLvl = -3;
-        // if(platformMotor.getReadings()<0)
-        // {
-        //   signOffset=-1
-        // }
-        // else
-        // {
-        //   signOffset=1;
-        // }
       }
       pMPID.compute();
     }
@@ -369,12 +352,12 @@ void platformSubLvl2(JSONVar msg)
   init_ = true;
   if (allRings)
   {
-    pMPID.setPulse(subLevel1);
+    pMPID.setPulse(signOffsetPlatform*subLevel1);
     allRings = false;
   }
   else if (!allRings)
   {
-    pMPID.setPulse(subLevel1 + platformSubLevel*oneRingPulse);
+    pMPID.setPulse(signOffsetPlatform*(subLevel1 + platformSubLevel*oneRingPulse));
   }
 }
 
@@ -405,5 +388,3 @@ void resetAll(JSONVar msg)
   platformLevel = 0;
   platformSubLevel = 0;
 }
-
-// add offset for what extra up & down detection
