@@ -25,7 +25,7 @@
 #include <positionalnew.h>
 
 Peer remote;
-JSONVar myData;
+JSONVar feedback; 
 Motor rotationMotor(22, 23);
 Motor platformMotor(33, 32);
 UniversalEncoder rotationEncoder(19, 18, 1);
@@ -138,12 +138,15 @@ void loop()
         rLvl2Pulse = rotationMotor.getReadings();
         if (rLvl2Pulse < 0)
         {
-          signOffsetRotation = -1;
+          signOffsetRotation = 1;//-1
         }
         else
         {
-          signOffsetRotation = 1;
+          signOffsetRotation = -1;//1
         }
+        feedback["type"] = "setROffset";
+        feedback["offset"]=signOffsetRotation;
+        remote.send(feedback);
         rotationExtraPulse = rLvl2Pulse * rotationPulseOffset;
         rInternalLvl = 3;
         Serial.println("rsignOff: " + String(signOffsetRotation) + " rLvl2: " + String(rLvl2Pulse) + " rExtra: " + String(rotationExtraPulse));
@@ -162,7 +165,9 @@ void loop()
         {
           signOffsetRotation = -1;//1
         }
-
+        feedback["type"] = "setROffset";
+        feedback["offset"]=signOffsetRotation;
+        remote.send(feedback);
         rotationMotor.reset();
         rInternalLvl = 3;
         rMPID.setPulse(signOffsetRotation*rLvl2Pulse);
@@ -250,6 +255,9 @@ void loop()
           {
             signOffsetPlatform = 1;
           }
+          feedback["type"] = "setPOffset";
+          feedback["offset"]=signOffsetPlatform;
+          remote.send(feedback);
           Serial.println("psignOff: " + String(signOffsetPlatform) + " pLvl1: " + String(pLvl1Pulse) + " Sublvl1: " + String(subLevel1) + " pExtra: " + String(platformExtraPulse) + " oneRing: " + String(oneRingPulse));
         }
         else if (pInternalLvl == 1 && pLs2) // meaning rotated to lvl2
@@ -264,8 +272,12 @@ void loop()
           {
             signOffsetPlatform = 1;
           }
+          feedback["type"] = "setPOffset";
+          feedback["offset"]=signOffsetPlatform;
+          remote.send(feedback);
           subLevel1 = pLvl1Pulse * 0.8;
-          platformExtraPulse = (pLvl1Pulse - subLevel1) * 0.05;
+          platformExtraPulse = (pLvl1Pulse - subLevel1) * 0.01;
+          subLevel1 = subLevel1 + platformExtraPulse;//check
           oneRingPulse = (pLvl1Pulse - subLevel1) * 0.1;
           platformMotor.reset();
           pInternalLvl = 3;
@@ -324,6 +336,10 @@ void loop()
 
 void rotationLvl1(JSONVar msg)
 {
+  // rMPID.setThreshold(100);
+  // rMPID.setOutputLimits(-30, 30);
+  // rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
+  // rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
   Serial.println("rotationLvl1");
   rotateLevel = 1;
   init_ = true;
@@ -332,6 +348,10 @@ void rotationLvl1(JSONVar msg)
 
 void rotationLvl2(JSONVar msg)
 {
+  // rMPID.setThreshold(100);
+  // rMPID.setOutputLimits(-30, 30);
+  // rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
+  // rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
   Serial.println("rotationLvl2");
   rotateLevel = 2;
   init_ = true;
@@ -340,14 +360,23 @@ void rotationLvl2(JSONVar msg)
 
 void platformLvl1(JSONVar msg)
 {
+  // pMPID.setThreshold(50);
+  pMPID.setOutputLimits(-60, 60);
+  // pMPID.setAggTunings(AggKp2, AggKi2, Aggkd2);
+  // pMPID.setSoftTunings(SoftKp2, SoftKi2, Softkd2);
   Serial.println("platformLvl1");
   platformLevel = 1;
+  allRings = false;
   init_ = true;
   pMPID.setPulse(signOffsetPlatform * pLvl1Pulse);
 }
 
 void platformSubLvl2(JSONVar msg)
 {
+  // pMPID.setThreshold(50);
+  pMPID.setOutputLimits(-100, 100);
+  // pMPID.setAggTunings(AggKp2, AggKi2, Aggkd2);
+  // pMPID.setSoftTunings(SoftKp2, SoftKi2, Softkd2);
   platformLevel = 2;
   platformSubLevel++;
   platformSubLevel = platformSubLevel > 10 ? 10 : platformSubLevel;
@@ -368,7 +397,7 @@ void setRotateExtraPulse(JSONVar msg)
 {
   int extraOffset = (int)msg["offset"];
   Serial.println("setRotateExtraPulse");
-  rMPID.setPulse(rotationMotor.getReadings() + (signOffsetRotation * extraOffset * rotationExtraPulse));
+  rMPID.setPulse(rotationMotor.getReadings() + (extraOffset * rotationExtraPulse));
   init_ = true;
 }
 
@@ -376,7 +405,7 @@ void setPlatformExtraPulse(JSONVar msg)
 {
   int extraOffset = (int)msg["offset"];
   Serial.println("setPlatformExtraPulse");
-  rMPID.setPulse(platformMotor.getReadings() + (signOffsetPlatform * extraOffset * platformExtraPulse));
+  pMPID.setPulse(platformMotor.getReadings() + (extraOffset * platformExtraPulse));
   init_ = true;
 }
 
