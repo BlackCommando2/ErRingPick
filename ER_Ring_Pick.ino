@@ -73,14 +73,14 @@ void setup()
   pinMode(platformLs2, INPUT_PULLUP);
 
   setId("PICKE");
-  remote.init("ESP11");
-  //  remote.setOnRecieve(rotationLvl1, "rLvl1");
-  //  remote.setOnRecieve(rotationLvl2, "rLvl2");
-  //  remote.setOnRecieve(platformLvl1, "pLvl1");
-  //  remote.setOnRecieve(platformSubLvl2, "pSLvl2");
-  //  remote.setOnRecieve(setRotateExtraPulse, "eP");
-  //  remote.setOnRecieve(setPlatformExtraPulse, "eR");
-  //  remote.setOnRecieve(resetAll,"Erst");
+  remote.init("TenZZ");
+  remote.setOnRecieve(rotationLvl1, "rLvl1");
+  remote.setOnRecieve(rotationLvl2, "rLvl2");
+  remote.setOnRecieve(platformLvl1, "pLvl1");
+  remote.setOnRecieve(platformSubLvl2, "pSLvl2");
+  remote.setOnRecieve(setRotateExtraPulse, "exPl");
+  remote.setOnRecieve(setPlatformExtraPulse, "exRo");
+  remote.setOnRecieve(resetAll, "Erst");
 }
 void loop()
 {
