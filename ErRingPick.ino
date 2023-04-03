@@ -41,7 +41,7 @@ double AggKpPlatform = 1.2, AggKiPlatform = 0.0, AggKdPlatform = 0;
 double SoftKpPlatform = 0.4, SoftKiPlatform = 0, SoftKdPlatform = 0;
 
 int rotateLs1 = 15, rotateLs2 = 16, platformLs1 = 14, platformLs2 = 17;
-int pneumaticPin = 13;
+//int pneumaticPin = 13;
 
 int rotateLevel = 0, platformLevel = 0, platformSubLevel = 0;
 int rInternalLvl = -1, pInternalLvl = -1;
@@ -57,13 +57,13 @@ bool pChange = false;
 void setup()
 {
   Serial.begin(115200);
-  pinMode(pneumaticPin,OUTPUT);
+  pinMode(13,OUTPUT);
   //  delay(5000);
   rotationMotor.setEncoder(&rotationEncoder);
   platformMotor.setEncoder(&platformEncoder);
 
   rMPID.setThreshold(100);
-  rMPID.setOutputLimits(-20, 20);
+  rMPID.setOutputLimits(-30, 30);
   rMPID.setAggTunings(AggKpRotation, AggKiRotation, AggKdRotation);
   rMPID.setSoftTunings(SoftKpRotation, SoftKiRotation, SoftKdRotation);
 
@@ -83,11 +83,12 @@ void setup()
   remote.setOnRecieve(rotationLvl1, "rLvl1");
   remote.setOnRecieve(rotationLvl2, "rLvl2");
   remote.setOnRecieve(platformLvl1, "pLvl1");
-  remote.setOnRecieve(platformSubLvl2, "pLvl2");
+  //remote.setOnRecieve(platformSubLvl2, "pLvl2");
   remote.setOnRecieve(setRotateExtraPulse, "exRo");
   remote.setOnRecieve(setPlatformExtraPulse, "exPl");
   remote.setOnRecieve(resetAll, "Erst");
-  remote.setOnRecieve(pneumaticChange, "pMove");
+  remote.setOnRecieve(pneumaticClose, "pClP");
+  remote.setOnRecieve(pneumaticOpen, "pOpP");
 }
 void loop()
 {
@@ -414,6 +415,50 @@ void platformLvl1(JSONVar msg)
 
 void platformSubLvl2(JSONVar msg)
 {
+//  // pMPID.setThreshold(50);
+//  pMPID.setOutputLimits(-100, 100);
+//  // pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
+//  // pMPID.setSoftTunings(SoftKpPlatform, SoftKiPlatform, SoftKdPlatform);
+//  platformLevel = 2;
+//  platformSubLevel++;
+//  platformSubLevel = platformSubLevel > 10 ? 10 : platformSubLevel;
+//  Serial.println("platformSubLvl2");
+//  init_ = true;
+//  if (allRings)
+//  {
+//    pMPID.setPulse(signOffsetPlatform * subLevel1);
+//    allRings = false;
+//  }
+//  else if (!allRings)
+//  {
+//    pMPID.setPulse(signOffsetPlatform * (subLevel1 - platformSubLevel * oneRingPulse));
+//  }
+//  datapick["platform"] ="LEVEL 2";
+//  datapick["sublevel"]=platformSubLevel;
+//  datapick["type"] = "plat";
+//  dataesp.send(datapick);
+}
+
+void setRotateExtraPulse(JSONVar msg)
+{
+  rMPID.setThreshold(30);
+  rMPID.setOutputLimits(-25, 25);
+  rMPID.setAggTunings(AggKpRotation, AggKiRotation, AggKdRotation);
+  rMPID.setSoftTunings(SoftKpRotation, SoftKiRotation, SoftKdRotation);
+  int extraOffset = (int)msg["offset"];
+  int setOffset = rotationMotor.getReadings() + (extraOffset * rotationExtraPulse);
+  //Serial.println(JSON.stringify(msg));
+  //Serial.println("setOffset: " + String(setOffset) + "RotaEP: " + String(rotationExtraPulse));
+  rMPID.setPulse(setOffset);
+  init_ = true;
+  datapick["rExtra"] =rotationExtraPulse;
+  datapick["setOffset"]=setOffset;
+  datapick["type"] = "rotation";
+  dataesp.send(datapick);
+}
+
+void setPlatformExtraPulse(JSONVar msg)
+{
   // pMPID.setThreshold(50);
   pMPID.setOutputLimits(-100, 100);
   // pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
@@ -436,38 +481,16 @@ void platformSubLvl2(JSONVar msg)
   datapick["sublevel"]=platformSubLevel;
   datapick["type"] = "plat";
   dataesp.send(datapick);
-}
-
-void setRotateExtraPulse(JSONVar msg)
-{
-  rMPID.setThreshold(30);
-  rMPID.setOutputLimits(-30, 30);
-  rMPID.setAggTunings(AggKpRotation, AggKiRotation, AggKdRotation);
-  rMPID.setSoftTunings(SoftKpRotation, SoftKiRotation, SoftKdRotation);
-  int extraOffset = (int)msg["offset"];
-  int setOffset = rotationMotor.getReadings() + (extraOffset * rotationExtraPulse);
-  //Serial.println(JSON.stringify(msg));
-  //Serial.println("setOffset: " + String(setOffset) + "RotaEP: " + String(rotationExtraPulse));
-  rMPID.setPulse(setOffset);
-  init_ = true;
-  datapick["rExtra"] =rotationExtraPulse;
-  datapick["setOffset"]=setOffset;
-  datapick["type"] = "rotation";
-  dataesp.send(datapick);
-}
-
-void setPlatformExtraPulse(JSONVar msg)
-{
-  int extraOffset = (int)msg["offset"];
-  int setOffset = platformMotor.getReadings() + (extraOffset * platformExtraPulse);
-  //Serial.println(JSON.stringify(msg));
-  //Serial.println("Off: " + (String)setOffset + " platEP: " + String(platformExtraPulse));
-  datapick["pExtra"] =platformExtraPulse;
-  datapick["setOffset"]=setOffset;
-  datapick["type"] = "plat";
-  dataesp.send(datapick);
-  pMPID.setPulse(setOffset);
-  init_ = true;
+//  int extraOffset = (int)msg["offset"];
+//  int setOffset = platformMotor.getReadings() + (extraOffset * platformExtraPulse);
+//  //Serial.println(JSON.stringify(msg));
+//  //Serial.println("Off: " + (String)setOffset + " platEP: " + String(platformExtraPulse));
+//  datapick["pExtra"] =platformExtraPulse;
+//  datapick["setOffset"]=setOffset;
+//  datapick["type"] = "plat";
+//  dataesp.send(datapick);
+//  pMPID.setPulse(setOffset);
+//  init_ = true;
 }
 
 void resetAll(JSONVar msg)
@@ -487,19 +510,13 @@ void resetAll(JSONVar msg)
   dataesp.send(datapick);
 }
 
-void pneumaticChange(JSONVar msg)
+void pneumaticClose(JSONVar msg)
 {
-  if(!pChange)
-  {
-    Serial.println("Pneumatic Close");
-    digitalWrite(pneumaticPin,HIGH);
-    pChange = true;
+    Serial.println("Pneumatic Close");    
+    digitalWrite(13,HIGH);
   }
-
-  else if(pChange)
-  {
+  void pneumaticOpen(JSONVar msg)
+{
     Serial.println("Pneumatic Open");
-    digitalWrite(pneumaticPin,LOW);
-    pChange = false;
+    digitalWrite(13,LOW);
   }
-}
