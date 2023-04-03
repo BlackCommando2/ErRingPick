@@ -95,7 +95,7 @@ void loop()
 
   rotatePulse = rotationMotor.getReadings();
   platformPulse = platformMotor.getReadings();
-  Serial.println("ROTATION=" + String(rotatePulse) + ", PLATFORM= " + String(platformPulse));
+  //  Serial.println("ROTATION=" + String(rotatePulse) + ", PLATFORM= " + String(platformPulse));
   pLs1 = !(bool)digitalRead(platformLs1);
   pLs2 = !(bool)digitalRead(platformLs2);
   rLs1 = !(bool)digitalRead(rotateLs1);
@@ -415,28 +415,28 @@ void platformLvl1(JSONVar msg)
 
 void platformSubLvl2(JSONVar msg)
 {
-  //  // pMPID.setThreshold(50);
-  //  pMPID.setOutputLimits(-100, 100);
-  //  // pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
-  //  // pMPID.setSoftTunings(SoftKpPlatform, SoftKiPlatform, SoftKdPlatform);
-  //  platformLevel = 2;
-  //  platformSubLevel++;
-  //  platformSubLevel = platformSubLevel > 10 ? 10 : platformSubLevel;
-  //  Serial.println("platformSubLvl2");
-  //  init_ = true;
-  //  if (allRings)
-  //  {
-  //    pMPID.setPulse(signOffsetPlatform * subLevel1);
-  //    allRings = false;
-  //  }
-  //  else if (!allRings)
-  //  {
-  //    pMPID.setPulse(signOffsetPlatform * (subLevel1 - platformSubLevel * oneRingPulse));
-  //  }
-  //  datapick["platform"] ="LEVEL 2";
-  //  datapick["sublevel"]=platformSubLevel;
-  //  datapick["type"] = "plat";
-  //  dataesp.send(datapick);
+  //    // pMPID.setThreshold(50);
+  //    pMPID.setOutputLimits(-100, 100);
+  //    // pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
+  //    // pMPID.setSoftTunings(SoftKpPlatform, SoftKiPlatform, SoftKdPlatform);
+  //    platformLevel = 2;
+  //    platformSubLevel++;
+  //    platformSubLevel = platformSubLevel > 10 ? 10 : platformSubLevel;
+  //    Serial.println("platformSubLvl2");
+  //    init_ = true;
+  //    if (allRings)
+  //    {
+  //      pMPID.setPulse(signOffsetPlatform * subLevel1);
+  //      allRings = false;
+  //    }
+  //    else if (!allRings)
+  //    {
+  //      pMPID.setPulse(signOffsetPlatform * (subLevel1 - platformSubLevel * oneRingPulse));
+  //    }
+  //    datapick["platform"] ="LEVEL 2";
+  //    datapick["sublevel"]=platformSubLevel;
+  //    datapick["type"] = "plat";
+  //    dataesp.send(datapick);
 }
 
 void setRotateExtraPulse(JSONVar msg)
@@ -459,8 +459,9 @@ void setRotateExtraPulse(JSONVar msg)
 
 void setPlatformExtraPulse(JSONVar msg)
 {
-  String temp=msg["side"];
-  if (temp=="up")
+  int temp = msg["side"];
+  int extraOffset = (int)msg["offset"];
+  if (temp == 1)
   {
     // pMPID.setThreshold(50);
     pMPID.setOutputLimits(-100, 100);
@@ -473,31 +474,39 @@ void setPlatformExtraPulse(JSONVar msg)
     init_ = true;
     if (allRings)
     {
-      pMPID.setPulse(signOffsetPlatform * subLevel1);
+      //      pMPID.setPulse(signOffsetPlatform * subLevel1);
+      pMPID.setPulse(-1 * extraOffset * subLevel1);
+      Serial.println("lvl1: " + (String)pLvl1Pulse + " UpOffset1: " + (String)int(extraOffset * (int)subLevel1) + " Sublvl: " + (String)subLevel1);
       allRings = false;
     }
     else if (!allRings)
     {
-      pMPID.setPulse(signOffsetPlatform * (subLevel1 - platformSubLevel * oneRingPulse));
+      //      pMPID.setPulse(signOffsetPlatform * (subLevel1 - platformSubLevel * oneRingPulse));
+      pMPID.setPulse(-1 * extraOffset * (subLevel1 - platformSubLevel * oneRingPulse));
+      Serial.println("lvl1: " + (String)pLvl1Pulse + " UpOffset2: " + (String)int(extraOffset * (subLevel1 - platformSubLevel * (int) oneRingPulse)) + " Sublvl: " + (String)subLevel1);
     }
     datapick["platform"] = "LEVEL 2";
     datapick["sublevel"] = platformSubLevel;
     datapick["type"] = "plat";
     dataesp.send(datapick);
   }
-  else if (temp=="down")
+  else if (temp == -1)
   {
-      int extraOffset = (int)msg["offset"];
-      int setOffset = platformMotor.getReadings() + (extraOffset * platformExtraPulse);
-      //Serial.println(JSON.stringify(msg));
-      //Serial.println("Off: " + (String)setOffset + " platEP: " + String(platformExtraPulse));
-      datapick["pExtra"] =platformExtraPulse;
-      datapick["setOffset"]=setOffset;
-      datapick["type"] = "plat";
-      dataesp.send(datapick);
-      pMPID.setPulse(setOffset);
-      init_ = true;
-      Serial.println("platformSubLvl1 extra down");
+    int extraOffset = (int)msg["offset"];
+    platformSubLevel--;
+    platformSubLevel = platformSubLevel < 1 ? 1 : platformSubLevel;
+    allRings = platformSubLevel < 1 ? !allRings : allRings;
+    //    int setOffset = platformMotor.getReadings() + (extraOffset * platformExtraPulse);
+    int setOffset = extraOffset * (subLevel1 - platformSubLevel * oneRingPulse);
+    //Serial.println(JSON.stringify(msg));
+    Serial.println("lvl1: " + (String)pLvl1Pulse + " Off: " + (String)setOffset + " platEP: " + String(platformExtraPulse));
+    datapick["pExtra"] = platformExtraPulse;
+    datapick["setOffset"] = setOffset;
+    datapick["type"] = "plat";
+    dataesp.send(datapick);
+    pMPID.setPulse(setOffset);
+    init_ = true;
+    Serial.println("platformSubLvl1 extra down");
   }
 }
 
