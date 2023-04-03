@@ -41,6 +41,7 @@ double AggKp2 = 1.2, AggKi2 = 0.0, Aggkd2 = 0;
 double SoftKp2 = 0.4, SoftKi2 = 0, Softkd2 = 0;
 
 int rotateLs1 = 15, rotateLs2 = 16, platformLs1 = 14, platformLs2 = 17;
+int pneumaticPin = 13;
 
 int rotateLevel = 0, platformLevel = 0, platformSubLevel = 0;
 int rInternalLvl = -1, pInternalLvl = -1;
@@ -52,9 +53,11 @@ long rLvl2Pulse = 0, pLvl1Pulse = 0, subLevel1 = 0, oneRingPulse = 0, rotationEx
 bool init_ = false;
 bool rLs1 = false, rLs2 = false, pLs1 = false, pLs2 = false;
 bool allRings = true;
+bool pChange = false;
 void setup()
 {
   Serial.begin(115200);
+  pinMode(pneumaticPin,OUTPUT);
   //  delay(5000);
   rotationMotor.setEncoder(&rotationEncoder);
   platformMotor.setEncoder(&platformEncoder);
@@ -84,6 +87,7 @@ void setup()
   remote.setOnRecieve(setRotateExtraPulse, "exRo");
   remote.setOnRecieve(setPlatformExtraPulse, "exPl");
   remote.setOnRecieve(resetAll, "Erst");
+  remote.setOnRecieve(pneumaticChange, "pMove");
 }
 void loop()
 {
@@ -481,4 +485,19 @@ void resetAll(JSONVar msg)
   datapick["res"]="reset";
   datapick["type"]="reset";
   dataesp.send(datapick);
+}
+
+void pneumaticChange(JSONVar msg)
+{
+  if(!pChange)
+  {
+    Serial.println("Pneumatic Close");
+    digitalWrite(pneumaticPin,HIGH);
+  }
+
+  else if(pChange)
+  {
+    Serial.println("Pneumatic Open");
+    digitalWrite(pneumaticPin,LOW);
+  }
 }
