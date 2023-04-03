@@ -493,11 +493,13 @@ void pneumaticChange(JSONVar msg)
   {
     Serial.println("Pneumatic Close");
     digitalWrite(pneumaticPin,HIGH);
+    pChange = true;
   }
 
   else if(pChange)
   {
     Serial.println("Pneumatic Open");
     digitalWrite(pneumaticPin,LOW);
+    pChange = false;
   }
 }
