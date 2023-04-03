@@ -442,7 +442,7 @@ void platformSubLvl2(JSONVar msg)
 void setRotateExtraPulse(JSONVar msg)
 {
   rMPID.setThreshold(30);
-  rMPID.setOutputLimits(-25, 25);
+  rMPID.setOutputLimits(-20, 20);
   rMPID.setAggTunings(AggKpRotation, AggKiRotation, AggKdRotation);
   rMPID.setSoftTunings(SoftKpRotation, SoftKiRotation, SoftKdRotation);
   int extraOffset = (int)msg["offset"];
@@ -459,7 +459,8 @@ void setRotateExtraPulse(JSONVar msg)
 
 void setPlatformExtraPulse(JSONVar msg)
 {
-  if (msg["side"]=="up")
+  String temp=msg["side"];
+  if (temp=="up")
   {
     // pMPID.setThreshold(50);
     pMPID.setOutputLimits(-100, 100);
@@ -484,7 +485,7 @@ void setPlatformExtraPulse(JSONVar msg)
     datapick["type"] = "plat";
     dataesp.send(datapick);
   }
-  else if (msg["side"]=="down")
+  else if (temp=="down")
   {
       int extraOffset = (int)msg["offset"];
       int setOffset = platformMotor.getReadings() + (extraOffset * platformExtraPulse);
@@ -496,6 +497,7 @@ void setPlatformExtraPulse(JSONVar msg)
       dataesp.send(datapick);
       pMPID.setPulse(setOffset);
       init_ = true;
+      Serial.println("platformSubLvl1 extra down");
   }
 }
 
