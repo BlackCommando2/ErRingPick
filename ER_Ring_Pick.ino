@@ -35,10 +35,10 @@ UniversalEncoder platformEncoder(25, 26, -1);
 positionalnew rMPID(&rotationMotor);
 positionalnew pMPID(&platformMotor);
 
-double AggKp1 = 1.0, AggKi1 = 0.0, Aggkd1 = 0;
-double SoftKp1 = 0.25, SoftKi1 = 0.0, Softkd1 = 0;
-double AggKp2 = 1.2, AggKi2 = 0.0, Aggkd2 = 0;
-double SoftKp2 = 0.4, SoftKi2 = 0, Softkd2 = 0;
+double AggKpRotation = 1.0, AggKiRotation = 0.0, AggKdRotation = 0;
+double SoftKpRotation = 0.25, SoftKiRotation = 0.0, SoftKdRotation = 0;
+double AggKpPlatform = 1.2, AggKiPlatform = 0.0, AggKdPlatform = 0;
+double SoftKpPlatform = 0.4, SoftKiPlatform = 0, SoftKdPlatform = 0;
 
 int rotateLs1 = 15, rotateLs2 = 16, platformLs1 = 14, platformLs2 = 17;
 int pneumaticPin = 13;
@@ -64,13 +64,13 @@ void setup()
 
   rMPID.setThreshold(100);
   rMPID.setOutputLimits(-20, 20);
-  rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
-  rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
+  rMPID.setAggTunings(AggKpRotation, AggKiRotation, AggKdRotation);
+  rMPID.setSoftTunings(SoftKpRotation, SoftKiRotation, SoftKdRotation);
 
   pMPID.setThreshold(50);
   pMPID.setOutputLimits(-70, 70);
-  pMPID.setAggTunings(AggKp2, AggKi2, Aggkd2);
-  pMPID.setSoftTunings(SoftKp2, SoftKi2, Softkd2);
+  pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
+  pMPID.setSoftTunings(SoftKpPlatform, SoftKiPlatform, SoftKdPlatform);
 
   pinMode(rotateLs1, INPUT_PULLUP);
   pinMode(rotateLs2, INPUT_PULLUP);
@@ -369,8 +369,8 @@ void rotationLvl1(JSONVar msg)
 {
   rMPID.setThreshold(200);
   rMPID.setOutputLimits(-30, 30);
-  rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
-  rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
+  rMPID.setAggTunings(AggKpRotation, AggKiRotation, AggKdRotation);
+  rMPID.setSoftTunings(SoftKpRotation, SoftKiRotation, SoftKdRotation);
   //Serial.println("rotationLvl1");
   rotateLevel = 1;
   init_ = true;
@@ -384,8 +384,8 @@ void rotationLvl2(JSONVar msg)
 {
   rMPID.setThreshold(200);
   rMPID.setOutputLimits(-50, 50);
-  rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
-  rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
+  rMPID.setAggTunings(AggKpRotation, AggKiRotation, AggKdRotation);
+  rMPID.setSoftTunings(SoftKpRotation, SoftKiRotation, SoftKdRotation);
   //Serial.println("rotationLvl2");
   datapick["rotate"] ="LEVEL 2";
   datapick["type"] = "rotation";
@@ -399,8 +399,8 @@ void platformLvl1(JSONVar msg)
 {
   // pMPID.setThreshold(50);
   pMPID.setOutputLimits(-60, 60);
-  // pMPID.setAggTunings(AggKp2, AggKi2, Aggkd2);
-  // pMPID.setSoftTunings(SoftKp2, SoftKi2, Softkd2);
+  // pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
+  // pMPID.setSoftTunings(SoftKpPlatform, SoftKiPlatform, SoftKdPlatform);
   //Serial.println("platformLvl1");
   datapick["platform"] ="LEVEL 1";
   datapick["type"] = "plat";
@@ -416,8 +416,8 @@ void platformSubLvl2(JSONVar msg)
 {
   // pMPID.setThreshold(50);
   pMPID.setOutputLimits(-100, 100);
-  // pMPID.setAggTunings(AggKp2, AggKi2, Aggkd2);
-  // pMPID.setSoftTunings(SoftKp2, SoftKi2, Softkd2);
+  // pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
+  // pMPID.setSoftTunings(SoftKpPlatform, SoftKiPlatform, SoftKdPlatform);
   platformLevel = 2;
   platformSubLevel++;
   platformSubLevel = platformSubLevel > 10 ? 10 : platformSubLevel;
@@ -442,8 +442,8 @@ void setRotateExtraPulse(JSONVar msg)
 {
   rMPID.setThreshold(30);
   rMPID.setOutputLimits(-30, 30);
-  rMPID.setAggTunings(AggKp1, AggKi1, Aggkd1);
-  rMPID.setSoftTunings(SoftKp1, SoftKi1, Softkd1);
+  rMPID.setAggTunings(AggKpRotation, AggKiRotation, AggKdRotation);
+  rMPID.setSoftTunings(SoftKpRotation, SoftKiRotation, SoftKdRotation);
   int extraOffset = (int)msg["offset"];
   int setOffset = rotationMotor.getReadings() + (extraOffset * rotationExtraPulse);
   //Serial.println(JSON.stringify(msg));
