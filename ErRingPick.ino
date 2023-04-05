@@ -303,7 +303,7 @@ void loop()
           subLevel1 = pLvl1Pulse * 0.8;
           platformExtraPulse = (pLvl1Pulse - subLevel1) * 0.1;
           subLevel1 = subLevel1 + platformExtraPulse;//check
-          oneRingPulse = (pLvl1Pulse - subLevel1) * 0.5;
+          oneRingPulse = (pLvl1Pulse - subLevel1) * 0.4;
           platformMotor.reset();
           pInternalLvl = 3;
           //Serial.println("psignOff: " + String(signOffsetPlatform) + " pLvl1: " + String(pLvl1Pulse) + " Sublvl1: " + String(subLevel1) + " pExtra: " + String(platformExtraPulse) + " oneRing: " + String(oneRingPulse));
@@ -468,8 +468,7 @@ void setPlatformExtraPulse(JSONVar msg)
     // pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
     // pMPID.setSoftTunings(SoftKpPlatform, SoftKiPlatform, SoftKdPlatform);
     platformLevel = 2;
-    platformSubLevel++;
-    platformSubLevel = platformSubLevel > 10 ? 10 : platformSubLevel;
+    
     Serial.println("platformSubLvl2");
     init_ = true;
     if (allRings)
@@ -481,6 +480,8 @@ void setPlatformExtraPulse(JSONVar msg)
     }
     else if (!allRings)
     {
+      platformSubLevel++;
+      platformSubLevel = platformSubLevel > 11 ? 11 : platformSubLevel;
       //      pMPID.setPulse(signOffsetPlatform * (subLevel1 - platformSubLevel * oneRingPulse));
       pMPID.setPulse(-1 * extraOffset * (subLevel1 - platformSubLevel * oneRingPulse));
       Serial.println("lvl1: " + (String)pLvl1Pulse + " UpOffset2: " + (String)int(extraOffset * (subLevel1 - platformSubLevel * (int) oneRingPulse)) + " Sublvl: " + (String)subLevel1);
