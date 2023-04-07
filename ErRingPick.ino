@@ -68,7 +68,7 @@ void setup()
   rMPID.setSoftTunings(SoftKpRotation, SoftKiRotation, SoftKdRotation);
 
   pMPID.setThreshold(50);
-  pMPID.setOutputLimits(-70, 70);
+  pMPID.setOutputLimits(-90, 90);
   pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
   pMPID.setSoftTunings(SoftKpPlatform, SoftKiPlatform, SoftKdPlatform);
 
@@ -303,7 +303,7 @@ void loop()
           subLevel1 = pLvl1Pulse * 0.8;
           platformExtraPulse = (pLvl1Pulse - subLevel1) * 0.1;
           subLevel1 = subLevel1 + platformExtraPulse;//check
-          oneRingPulse = (pLvl1Pulse - subLevel1) * 0.4;
+          oneRingPulse = subLevel1/9.5;
           platformMotor.reset();
           pInternalLvl = 3;
           //Serial.println("psignOff: " + String(signOffsetPlatform) + " pLvl1: " + String(pLvl1Pulse) + " Sublvl1: " + String(subLevel1) + " pExtra: " + String(platformExtraPulse) + " oneRing: " + String(oneRingPulse));
@@ -399,7 +399,7 @@ void rotationLvl2(JSONVar msg)
 void platformLvl1(JSONVar msg)
 {
   // pMPID.setThreshold(50);
-  pMPID.setOutputLimits(-60, 60);
+  pMPID.setOutputLimits(-70, 70);
   // pMPID.setAggTunings(AggKpPlatform, AggKiPlatform, AggKdPlatform);
   // pMPID.setSoftTunings(SoftKpPlatform, SoftKiPlatform, SoftKdPlatform);
   //Serial.println("platformLvl1");
@@ -500,14 +500,14 @@ void setPlatformExtraPulse(JSONVar msg)
     //    int setOffset = platformMotor.getReadings() + (extraOffset * platformExtraPulse);
     int setOffset = extraOffset * (subLevel1 - platformSubLevel * oneRingPulse);
     //Serial.println(JSON.stringify(msg));
-    Serial.println("lvl1: " + (String)pLvl1Pulse + " Off: " + (String)setOffset + " platEP: " + String(platformExtraPulse));
+    Serial.println("lvl1: " + (String)pLvl1Pulse +"platformSubLevel" +String( platformSubLevel)+" Off: " + (String)setOffset + " platEP: " + String(platformExtraPulse));
     datapick["pExtra"] = platformExtraPulse;
     datapick["setOffset"] = setOffset;
     datapick["type"] = "plat";
     dataesp.send(datapick);
     pMPID.setPulse(setOffset);
     init_ = true;
-    Serial.println("platformSubLvl1 extra down");
+    //Serial.println("platformSubLvl1 extra down");
   }
 }
 
